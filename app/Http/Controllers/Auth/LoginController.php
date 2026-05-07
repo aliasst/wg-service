@@ -8,8 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+    protected $redirectTo = '/admin';
+
     public function showLoginForm()
     {
+        if (auth()->check()) {
+            return redirect('/admin');
+        }
         return view('auth.login');
     }
 
