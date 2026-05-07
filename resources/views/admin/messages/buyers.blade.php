@@ -30,7 +30,7 @@
                 <h5>Шаг 2. Выберите получателей и составьте сообщение</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('admin.messages.send') }}">
+                <form method="POST" action="{{ route('admin.messages.send') }}" id="sendForm">
                     @csrf
                     <input type="hidden" name="category_id" value="{{ $selectedCategoryId }}">
 
@@ -44,6 +44,16 @@
                         <small class="text-muted">Поддерживаются эмодзи. Заголовок и текст будут разделены двумя переводами строки.</small>
                     </div>
 
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="selectAllBtn">Выбрать всех</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllBtn">Снять выделение</button>
+                        </div>
+                        <div>
+                            <strong>Выбрано: <span id="selectedCount">0</span></strong>
+                        </div>
+                    </div>
+
                     <table class="table table-bordered">
                         <thead>
                         <tr><th><input type="checkbox" id="selectAll"></th><th>Имя покупателя</th><th>Номер заказа</th><th>Телефон</th></tr>
@@ -51,7 +61,7 @@
                         <tbody>
                         @foreach($buyers as $order)
                             <tr>
-                                <td><input type="checkbox" name="order_ids[]" value="{{ $order->id }}"></td>
+                                <td><input type="checkbox" name="order_ids[]" value="{{ $order->id }}" class="buyer-checkbox"></td>
                                 <td>{{ $order->customer_name ?? 'Не указан' }}</td>
                                 <td>{{ $order->posting_number }}</td>
                                 <td>{{ $order->customer_phone ?? '—' }}</td>
@@ -59,14 +69,58 @@
                         @endforeach
                         </tbody>
                     </table>
-                    <button type="submit" class="btn btn-success">Отправить выбранным</button>
+                    <button type="submit" class="btn btn-success mt-3">Отправить выбранным</button>
                 </form>
             </div>
         </div>
 
         <script>
-            document.getElementById('selectAll')?.addEventListener('change', function(e) {
-                document.querySelectorAll('input[name="order_ids[]"]').forEach(cb => cb.checked = e.target.checked);
+            document.addEventListener('DOMContentLoaded', function() {
+                const checkboxes = document.querySelectorAll('.buyer-checkbox');
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const selectedCountSpan = document.getElementById('selectedCount');
+                const selectAllBtn = document.getElementById('selectAllBtn');
+                const deselectAllBtn = document.getElementById('deselectAllBtn');
+
+                function updateSelectedCount() {
+                    const checked = document.querySelectorAll('.buyer-checkbox:checked').length;
+                    selectedCountSpan.textContent = checked;
+                }
+
+                function setAllCheckboxes(checked) {
+                    checkboxes.forEach(cb => cb.checked = checked);
+                    if (selectAllCheckbox) selectAllCheckbox.checked = checked;
+                    updateSelectedCount();
+                }
+
+                // Обновление счетчика при клике на любой чекбокс
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', updateSelectedCount);
+                });
+
+                // Чекбокс "Выделить все"
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', function() {
+                        setAllCheckboxes(this.checked);
+                    });
+                }
+
+                // Кнопка "Выбрать всех"
+                if (selectAllBtn) {
+                    selectAllBtn.addEventListener('click', function() {
+                        setAllCheckboxes(true);
+                    });
+                }
+
+                // Кнопка "Снять выделение"
+                if (deselectAllBtn) {
+                    deselectAllBtn.addEventListener('click', function() {
+                        setAllCheckboxes(false);
+                    });
+                }
+
+                // Инициализация счетчика
+                updateSelectedCount();
             });
         </script>
     @elseif($selectedCategoryId)
