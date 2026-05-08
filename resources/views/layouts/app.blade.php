@@ -37,6 +37,7 @@
                     $accounts = App\Models\ApiAccount::where('is_active', true)->get();
                 @endphp
 
+
                 @if($accounts->count() > 1)
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
