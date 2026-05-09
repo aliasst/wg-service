@@ -62,9 +62,11 @@
                     <form method="POST" action="{{ route('admin.orders.sync') }}" class="d-inline">
                         @csrf
                         <select name="days" class="form-select d-inline w-auto">
+                            <option value="1">За 1 день</option>
+                            <option value="3" selected>За 3 дня</option>
                             <option value="7">За 7 дней</option>
-                            <option value="30" selected>За 30 дней</option>
-                            <option value="60">За 60 дней</option>
+{{--                            <option value="30" selected>За 30 дней</option>--}}
+{{--                            <option value="60">За 60 дней</option>--}}
                         </select>
                         <button type="submit" class="btn btn-primary">Запустить синхронизацию заказов</button>
                     </form>
