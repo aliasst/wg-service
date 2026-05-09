@@ -50,46 +50,105 @@ class OzonApiService
     }
 
     /**
-     * Получение заказов FBS (доставленные)
+     * Получение заказов FBS через API v4 с поддержкой пагинации (курсор)
+     *
+     * @param string $fromDate
+     * @param string $toDate
+     * @param int $limit  Количество заказов на страницу (макс. 100)
+     * @param string $cursor  Курсор для следующей страницы (пустая строка для первой)
+     * @return array ['items' => [], 'has_next' => bool, 'cursor' => string]
      */
-    public function getFbsPostings(string $fromDate, string $toDate): array
+    public function getFbsPostingsPaginated(string $fromDate, string $toDate, int $limit = 100, string $cursor = ''): array
     {
-        $url = $this->baseUrl . '/v3/posting/fbs/list';
+        $url = $this->baseUrl . '/v4/posting/fbs/list';
         $payload = [
+            'sort_dir' => 'asc',
             'filter' => [
                 'since' => $fromDate,
-                'to' => $toDate,
-                'status' => 'delivered'
+                'to'    => $toDate,
+                'status' => ['awaiting_packaging', 'awaiting_deliver', 'delivering', 'delivered', 'cancelled'],
             ],
-            'limit' => 100
+            'limit' => min($limit, 100),
+            'cursor' => $cursor,
+            'with' => [
+                'analytics_data' => false,
+                'barcodes'       => true,
+                'financial_data' => false,
+                'legal_info'     => true,
+                'translit'       => false,
+            ],
         ];
         $response = Http::withHeaders($this->headers())->post($url, $payload);
         $response->throw();
-        return $response->json()['result']['postings'] ?? [];
+        $data = $response->json();
+        return [
+            'items'    => $data['postings'] ?? [],
+            'has_next' => $data['has_next'] ?? false,
+            'cursor'   => $data['cursor'] ?? '',
+        ];
+    }
+
+
+    /**
+     * Получение заказов FBS через API v4 (один запрос, без пагинации)
+     */
+    /**
+     * Получение заказов FBS через API v4 (один запрос, без пагинации)
+     */
+    public function getFbsPostings(string $fromDate, string $toDate, int $limit = 100): array
+    {
+        $url = $this->baseUrl . '/v4/posting/fbs/list';
+        $payload = [
+            'sort_dir' => 'asc',
+            'filter' => [
+                'since' => $fromDate,
+                'to'    => $toDate,
+                'status' => ['awaiting_packaging', 'awaiting_deliver', 'delivering', 'delivered', 'cancelled'],
+            ],
+            'limit'  => min($limit, 100),
+            'cursor' => '',
+            'with'   => [
+                'analytics_data' => false,
+                'barcodes'       => true,
+                'financial_data' => false,
+                'legal_info'     => true,
+                'translit'       => false,
+            ],
+        ];
+        $response = Http::withHeaders($this->headers())->post($url, $payload);
+        $response->throw();
+        $data = $response->json();
+        // В v4 заказы находятся в корневом ключе 'postings'
+        return $data['postings'] ?? [];
     }
 
     /**
-     * Получение заказов FBO (доставленные)
+     * Получение заказов FBO через API v3 (современный формат запроса, без пагинации)
      */
-    public function getFboPostings(string $fromDate, string $toDate): array
+    public function getFboPostings(string $fromDate, string $toDate, int $limit = 100): array
     {
         $url = $this->baseUrl . '/v3/posting/fbo/list';
         $payload = [
-            'filter' => [
+            'dir'      => 'asc',        // или 'sort_dir' – проверьте по документации
+            'filter'   => [
                 'since' => $fromDate,
-                'to' => $toDate,
-                'status' => 'delivered'
+                'to'    => $toDate,
             ],
-            'limit' => 100
+            'limit'    => min($limit, 100),
+            'cursor'   => '',
+            'with'     => [
+                'analytics_data' => false,
+                'financial_data' => false,
+                'legal_info'     => true,
+            ],
         ];
         $response = Http::withHeaders($this->headers())->post($url, $payload);
         $response->throw();
-        return $response->json()['result']['postings'] ?? [];
+        $data = $response->json();
+        // В v3 для FBO заказы лежат в корневом ключе 'postings'
+        return $data['postings'] ?? [];
     }
 
-    /**
-     * Получить chat_id по номеру отправления
-     */
     public function getChatIdByPostingNumber(string $postingNumber): ?string
     {
         $url = $this->baseUrl . '/v1/chat/list';
@@ -113,6 +172,7 @@ class OzonApiService
             $payload = ['posting_number' => $postingNumber];
             $response = Http::withHeaders($this->headers())->post($url, $payload);
             $data = $response->json();
+            \Log::info('Создание чата: ' . $response->json());
             return $data['chat_id'] ?? null;
         } catch (\Exception $e) {
             \Log::error('Ошибка при создании чата: ' . $e->getMessage());

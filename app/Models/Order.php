@@ -20,6 +20,7 @@ class Order extends Model
         'user_id',
         'order_type',
         'api_account_id',
+        'payment_date',
     ];
 
     protected $casts = [

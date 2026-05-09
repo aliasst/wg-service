@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiAccount;
 use App\Services\OzonApiService;
 use App\Models\Order;
 use Illuminate\Support\Carbon;
@@ -12,11 +13,16 @@ class TestController extends Controller
 {
     public function index()
     {
+        // 1. Определяем api_account_id
+        $clientId = env('OZON_CLIENT_ID');
+        $apiKey = env('OZON_API_KEY');
+
+
         echo "<pre>";
         echo "<h1>Тестирование Ozon API (сырые ответы)</h1>";
 
         try {
-            $api = new OzonApiService();
+            $api = new OzonApiService($clientId, $apiKey);
             echo "<strong>✅ Сервис инициализирован</strong>\n\n";
         } catch (\Exception $e) {
             echo "<strong style='color:red'>❌ Ошибка инициализации: " . $e->getMessage() . "</strong>";
@@ -69,9 +75,7 @@ class TestController extends Controller
 
         // 4. getProductInfo для первого товара из БД
 
-        $testId = 432585; // какой-то реальный sku из заказа
-        $info = $api->getProductInfo($testId);
-        var_dump($info);
+
 
 
         echo "<h2>4. getProductInfo (первый товар из последнего заказа в БД)</h2>";

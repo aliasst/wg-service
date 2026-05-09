@@ -80,4 +80,11 @@ class MessageController extends Controller
             ->paginate(20);
         return view('admin.messages.history', compact('messages'));
     }
+
+    public function logs(Message $message)
+    {
+        $logs = $message->logs()->with('order')->orderBy('id', 'desc')->get();
+        return view('admin.messages.logs', compact('message', 'logs'));
+    }
+
 }

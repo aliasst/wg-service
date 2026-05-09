@@ -36,7 +36,7 @@ Route::middleware(['auth', 'set.api.account'])->prefix('admin')->name('admin.')-
     Route::get('/messages/buyers', [MessageController::class, 'showBuyers'])->name('messages.buyers');
     Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
     Route::get('/messages/history', [MessageController::class, 'history'])->name('messages.history');
-    // (опционально) Route::get('/messages/{message}/logs', [MessageController::class, 'logs'])->name('messages.logs');
+    Route::get('/messages/{message}/logs', [MessageController::class, 'logs'])->name('messages.logs');
 
     // Маршруты только для администраторов
     Route::middleware('can:admin')->group(function () {
