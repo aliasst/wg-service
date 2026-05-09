@@ -216,7 +216,7 @@ class SyncOzonOrders extends Command
                         'product_name' => $product['name'],
                         'quantity'     => $quantity,
                         'price'        => $price,
-                        'category_id'  => $categoryId,
+//                        'category_id'  => $categoryId,
                     ]
                 );
             }
