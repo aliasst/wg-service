@@ -77,7 +77,20 @@ class SyncOzonOrders extends Command
                 $fbsOrdersRaw = $allFbsRaw;
 
 
-            $fboOrdersRaw = $api->getFboPostings($fromDate, $toDate, $limit);
+//            $fboOrdersRaw = $api->getFboPostings($fromDate, $toDate, $limit);
+            // FBO с пагинацией
+            $cursor = '';
+            $allFboRaw = [];
+            $page = 1;
+            do {
+                $result = $api->getFboPostingsPaginated($fromDate, $toDate, $limit, $cursor);
+                $allFboRaw = array_merge($allFboRaw, $result['items']);
+                $this->info("FBO страница {$page}: загружено " . count($result['items']) . " заказов, has_next = " . ($result['has_next'] ? 'true' : 'false'));
+                $cursor = $result['cursor'];
+                $page++;
+            } while ($result['has_next']);
+
+            $fboOrdersRaw = $allFboRaw;
 //        $fboOrdersRaw = []; // временно
         } catch (\Exception $e) {
             $this->error('Ошибка получения заказов: ' . $e->getMessage());

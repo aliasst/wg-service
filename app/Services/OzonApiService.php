@@ -123,6 +123,41 @@ class OzonApiService
     }
 
     /**
+     * Получение заказов FBO с пагинацией (курсор)
+     *
+     * @param string $fromDate
+     * @param string $toDate
+     * @param int $limit
+     * @param string $cursor
+     * @return array ['items' => [], 'has_next' => bool, 'cursor' => string]
+     */
+    public function getFboPostingsPaginated(string $fromDate, string $toDate, int $limit = 100, string $cursor = ''): array
+    {
+        $url = $this->baseUrl . '/v3/posting/fbo/list';
+        $payload = [
+            'filter' => [
+                'since' => $fromDate,
+                'to'    => $toDate,
+            ],
+            'limit'  => min($limit, 100),
+            'cursor' => $cursor,
+            'with'   => [
+                'analytics_data' => true,
+                'financial_data' => false,
+                'legal_info'     => true,
+            ],
+        ];
+        $response = Http::withHeaders($this->headers())->post($url, $payload);
+        $response->throw();
+        $data = $response->json();
+        return [
+            'items'    => $data['postings'] ?? [],
+            'has_next' => $data['has_next'] ?? false,
+            'cursor'   => $data['cursor'] ?? '',
+        ];
+    }
+
+    /**
      * Получение заказов FBO через API v3 (современный формат запроса, без пагинации)
      */
     public function getFboPostings(string $fromDate, string $toDate, int $limit = 100): array
