@@ -56,15 +56,29 @@
 
                     <table class="table table-bordered">
                         <thead>
-                        <tr><th><input type="checkbox" id="selectAll"></th><th>Имя покупателя</th><th>Номер заказа</th><th>Телефон</th></tr>
+                        <tr><th><input type="checkbox" id="selectAll"></th>
+{{--                            <th>Имя покупателя</th>--}}
+                            <th>Номер заказа</th>
+{{--                            <th>Телефон</th>--}}
+                            <th>Тип заказа</th>   {{-- новый столбец --}}
+                        </tr>
                         </thead>
                         <tbody>
                         @foreach($buyers as $order)
                             <tr>
                                 <td><input type="checkbox" name="order_ids[]" value="{{ $order->id }}" class="buyer-checkbox"></td>
-                                <td>{{ $order->customer_name ?? 'Не указан' }}</td>
+{{--                                <td>{{ $order->customer_name ?? 'Не указан' }}</td>--}}
                                 <td>{{ $order->posting_number }}</td>
-                                <td>{{ $order->customer_phone ?? '—' }}</td>
+{{--                                <td>{{ $order->customer_phone ?? '—' }}</td>--}}
+                                <td>
+                                    @if($order->order_type === 'fbs')
+                                        <span class="badge bg-primary">FBS</span>
+                                    @elseif($order->order_type === 'fbo')
+                                        <span class="badge bg-secondary">FBO</span>
+                                    @else
+                                        <span class="badge bg-light text-dark">—</span>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                         </tbody>
