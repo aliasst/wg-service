@@ -76,26 +76,29 @@ class SendMessageToBuyer implements ShouldQueue
         }
     }
 
-    private function logSuccess()
+    private function logSuccess($recipientName)
     {
         MessageLog::create([
-            'message_id' => $this->messageId,
-            'order_id' => $this->order->id,
-            'recipient_name' => $this->order->customer_name,
-            'sent_at' => now(),
-            'status' => 'success',
+            'message_id'      => $this->messageId,
+            'order_id'        => $this->order->id,
+            'recipient_name'  => $recipientName,
+            'sent_at'         => now(),
+            'status'          => 'success',
         ]);
     }
 
-    private function logError($error)
+    private function logError($error, $recipientName = null)
     {
+        if ($recipientName === null) {
+            $recipientName = $this->order->customer_name ?? 'Неизвестный';
+        }
         MessageLog::create([
-            'message_id' => $this->messageId,
-            'order_id' => $this->order->id,
-            'recipient_name' => $this->order->customer_name,
-            'sent_at' => now(),
-            'status' => 'error',
-            'error_text' => $error,
+            'message_id'      => $this->messageId,
+            'order_id'        => $this->order->id,
+            'recipient_name'  => $recipientName,
+            'sent_at'         => now(),
+            'status'          => 'error',
+            'error_text'      => $error,
         ]);
     }
 }
