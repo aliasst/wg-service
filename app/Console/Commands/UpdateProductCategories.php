@@ -56,6 +56,7 @@ class UpdateProductCategories extends Command
         // ---------- Выбираем товары без категорий ----------
         // Для FBS товаров у нас есть `offer_id`, для FBO тоже. Используем `offer_id`, если есть, иначе sku.
         $items = OrderItem::whereNull('category_id')
+            ->where('category_lookup_failed', false)
             ->where('sku', '!=', '')
             ->limit($limit)
             ->get();
@@ -89,6 +90,9 @@ class UpdateProductCategories extends Command
                     $this->line("✅ Товар {$item->id} (sku: {$item->sku}) – категория: {$categoryId}");
                     $updated++;
                 } else {
+                    // Категория не найдена – помечаем товар, чтобы в будущем пропускать
+                    $item->category_lookup_failed = true;
+                    $item->save();
                     $this->warn("⚠️ Товар {$item->id} – категория не найдена (description_category_id отсутствует)");
                     $errors++;
                 }

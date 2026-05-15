@@ -17,11 +17,13 @@ class OrderItem extends Model
         'category_id',
         'quantity',
         'price',
+        'category_lookup_failed',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'quantity' => 'integer',
+        'category_lookup_failed' => 'boolean',
     ];
 
     // связь с заказом
