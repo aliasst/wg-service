@@ -36,6 +36,7 @@ class MessageController extends Controller
             }])
                 ->where('api_account_id', $currentAccount->id)
                 ->where('status', 'delivered')
+                ->whereNotNull('payment_date')
                 ->whereHas('items', function ($q) use ($ozonIds) {
                     $q->whereIn('category_id', $ozonIds);
                 });
@@ -44,7 +45,7 @@ class MessageController extends Controller
                 $query->where('payment_date', '>=', now()->subDays((int)$paidDays));
             }
 
-            $buyers = $query->get(); // без map, атрибуты payment_interval и payment_days уже есть в модели
+            $buyers = $query->get();
         }
 
         return view('admin.messages.buyers', compact('categories', 'selectedCategoryId', 'buyers', 'paidDays'));
