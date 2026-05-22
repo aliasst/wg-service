@@ -205,14 +205,36 @@ class OzonApiService
     public function startChat(string $postingNumber): ?string
     {
         try {
+            \Log::info('startChat: начало', ['postingNumber' => $postingNumber]);
+
             $url = $this->baseUrl . '/v1/chat/start';
             $payload = ['posting_number' => $postingNumber];
+
+            \Log::info('startChat: отправка запроса', ['url' => $url, 'payload' => $payload]);
+
             $response = Http::withHeaders($this->headers())->post($url, $payload);
-            $data = $response->json();
-            \Log::info('Создание чата: ' . $response->json());
-            return $data['chat_id'] ?? null;
-        } catch (\Exception $e) {
-            \Log::error('Ошибка при создании чата: ' . $e->getMessage());
+
+            \Log::info('startChat: получен ответ', ['status' => $response->status()]);
+
+            // Безопасное логирование тела ответа (может быть массивом)
+            $responseData = $response->json();
+            \Log::info('startChat: тело ответа', ['data' => $responseData]);
+
+            if (!$response->successful()) {
+                \Log::error('Ошибка создания чата', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return null;
+            }
+
+            return $responseData['chat_id'] ?? null;
+
+        } catch (\Throwable $e) {
+            // Полный стек ошибки
+            \Log::error('Ошибка при создании чата: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return null;
         }
     }
