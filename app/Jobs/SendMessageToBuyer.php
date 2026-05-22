@@ -43,20 +43,15 @@ class SendMessageToBuyer implements ShouldQueue
         // Логика для FBS: можем создать чат, если его нет
         if ($this->order->order_type === 'fbs') {
             if (!$chatId) {
-                \Log::info('Пробуем найти существующий чат');
-                // Пробуем найти существующий чат
-                $chatId = $api->getChatIdByPostingNumber($postingNumber);
-                if (!$chatId) {
-                    \Log::info('Создаём новый чат');
-                    // Создаём новый чат
-                    \Log::info('Попытка создать чат для posting_number', [
-                        'value' => $this->order->posting_number,
-                        'type'  => gettype($this->order->posting_number)
-                    ]);
+                \Log::info('Создаём новый чат');
+                try {
                     $chatId = $api->startChat($postingNumber);
-                }
-                if ($chatId) {
-                    $this->order->update(['chat_id' => $chatId]);
+                    if ($chatId) {
+                        $this->order->update(['chat_id' => $chatId]);
+                    }
+                } catch (\Exception $e) {
+                    $this->logError($e->getMessage());
+                    return;
                 }
             }
         } else { // FBO – только если чат уже существует

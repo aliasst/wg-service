@@ -225,7 +225,9 @@ class OzonApiService
                     'status' => $response->status(),
                     'body' => $response->body()
                 ]);
-                return null;
+                $errorBody = $response->json();
+                $errorMsg = $errorBody['message'] ?? 'Неизвестная ошибка API';
+                throw new \Exception($errorMsg);
             }
 
             return $responseData['chat_id'] ?? null;
