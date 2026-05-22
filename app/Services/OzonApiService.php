@@ -299,7 +299,7 @@ class OzonApiService
         $url = $this->baseUrl . '/v1/chat/send/message';   // правильный UR
         $payload = [
             'chat_id' => $chatId,
-            'message' => ['text' => $text],
+            'text' => $text,
         ];
 
         \Log::info('sendMessage request', [

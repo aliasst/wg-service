@@ -85,6 +85,7 @@ class SendMessageToBuyer implements ShouldQueue
         }
 
         $fullText = $this->header . "\n\n" . $this->body;
+        \Log::info('Message rune length', ['len' => mb_strlen($fullText)]);
         try {
             $api->sendMessage($chatId, $fullText);
             $this->logSuccess($recipientName);
