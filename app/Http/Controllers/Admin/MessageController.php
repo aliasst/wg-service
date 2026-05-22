@@ -16,29 +16,43 @@ class MessageController extends Controller
     // Страница выбора категории и отображения покупателей
     public function showBuyers(Request $request)
     {
-        $currentAccount = app('currentApiAccount'); // получаем текущий аккаунт из middleware
+        $currentAccount = app('currentApiAccount');
         if (!$currentAccount) {
             return redirect()->route('admin.dashboard')->with('error', 'Не выбран API-аккаунт');
         }
 
         $categories = CategoryMapping::where('is_active', true)->get();
         $selectedCategoryId = $request->input('category_id');
+        $paidDays = $request->input('paid_days'); // получаем значение фильтра
         $buyers = collect();
 
         if ($selectedCategoryId) {
             $category = CategoryMapping::findOrFail($selectedCategoryId);
             $ozonIds = $category->ozon_category_ids;
 
-            $buyers = Order::with('items')
-                ->where('api_account_id', $currentAccount->id)   // ← фильтр по аккаунту
+            $query = Order::with(['items', 'messageLogs' => function($q) {
+                $q->latest();
+            }])
+                ->where('api_account_id', $currentAccount->id)
                 ->where('status', 'delivered')
                 ->whereHas('items', function ($q) use ($ozonIds) {
                     $q->whereIn('category_id', $ozonIds);
-                })
-                ->get();
+                });
+
+            // Применяем фильтр по дате оплаты, если указан
+            if ($paidDays && is_numeric($paidDays) && $paidDays > 0) {
+                $query->where('payment_date', '>=', now()->subDays((int)$paidDays));
+            }
+
+            $buyers = $query->get()->map(function ($order) {
+                // Добавим вычисляемое поле "время с оплаты"
+                $order->payment_interval = $order->payment_date ? Carbon::parse($order->payment_date)->diffForHumans() : null;
+                $order->payment_days = $order->payment_date ? Carbon::parse($order->payment_date)->diffInDays(now()) : null;
+                return $order;
+            });
         }
 
-        return view('admin.messages.buyers', compact('categories', 'selectedCategoryId', 'buyers'));
+        return view('admin.messages.buyers', compact('categories', 'selectedCategoryId', 'buyers', 'paidDays'));
     }
 
     // Отправка сообщений выбранным покупателям

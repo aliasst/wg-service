@@ -57,4 +57,18 @@ class Order extends Model
     {
         return $this->belongsTo(ApiAccount::class);
     }
+
+
+    public function getLastMessageLogAttribute()
+    {
+        return $this->messageLogs()->latest()->first();
+    }
+
+    public function getPaymentDaysDiffAttribute()
+    {
+        if (!$this->payment_date) {
+            return null;
+        }
+        return $this->payment_date->diffForHumans(); // например, "3 дня назад"
+    }
 }
