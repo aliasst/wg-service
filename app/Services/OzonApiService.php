@@ -204,41 +204,18 @@ class OzonApiService
      */
     public function startChat(string $postingNumber): ?string
     {
-        try {
-            \Log::info('startChat: начало', ['postingNumber' => $postingNumber]);
+        $url = $this->baseUrl . '/v1/chat/start';
+        $payload = ['posting_number' => $postingNumber];
+        $response = Http::withHeaders($this->headers())->post($url, $payload);
 
-            $url = $this->baseUrl . '/v1/chat/start';
-            $payload = ['posting_number' => $postingNumber];
-
-            \Log::info('startChat: отправка запроса', ['url' => $url, 'payload' => $payload]);
-
-            $response = Http::withHeaders($this->headers())->post($url, $payload);
-
-            \Log::info('startChat: получен ответ', ['status' => $response->status()]);
-
-            // Безопасное логирование тела ответа (может быть массивом)
-            $responseData = $response->json();
-            \Log::info('startChat: тело ответа', ['data' => $responseData]);
-
-            if (!$response->successful()) {
-                \Log::error('Ошибка создания чата', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                $errorBody = $response->json();
-                $errorMsg = $errorBody['message'] ?? 'Неизвестная ошибка API';
-                throw new \Exception($errorMsg);
-            }
-
-            return $responseData['chat_id'] ?? null;
-
-        } catch (\Throwable $e) {
-            // Полный стек ошибки
-            \Log::error('Ошибка при создании чата: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
-            return null;
+        if (!$response->successful()) {
+            $errorBody = $response->json();
+            $errorMsg = $errorBody['message'] ?? 'Неизвестная ошибка API';
+            throw new \Exception($errorMsg);
         }
+
+        $data = $response->json();
+        return $data['chat_id'] ?? null;
     }
 
     /**
