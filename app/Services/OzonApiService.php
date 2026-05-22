@@ -192,6 +192,8 @@ class OzonApiService
             'limit' => 1
         ];
         $response = Http::withHeaders($this->headers())->post($url, $payload);
+        \Log::channel('stack')->info('API Request to: ' . $url, ['payload' => $payload]);
+        \Log::channel('stack')->info('API Response: ' . $response->status(), ['body' => $response->body()]);
         $data = $response->json();
         $chats = $data['chats'] ?? [];
         return $chats[0]['chat_id'] ?? null;

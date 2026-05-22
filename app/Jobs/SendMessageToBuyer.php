@@ -49,6 +49,10 @@ class SendMessageToBuyer implements ShouldQueue
                 if (!$chatId) {
                     \Log::info('Создаём новый чат');
                     // Создаём новый чат
+                    \Log::info('Попытка создать чат для posting_number', [
+                        'value' => $this->order->posting_number,
+                        'type'  => gettype($this->order->posting_number)
+                    ]);
                     $chatId = $api->startChat($postingNumber);
                 }
                 if ($chatId) {
