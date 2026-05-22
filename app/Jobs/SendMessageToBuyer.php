@@ -29,6 +29,15 @@ class SendMessageToBuyer implements ShouldQueue
 
     public function handle()
     {
+        \Log::info('SendMessageToBuyer started', [
+            'order_id' => $this->order->id,
+            'posting_number' => $this->order->posting_number,
+            'order_type' => $this->order->order_type,
+            'has_chat_id' => !empty($this->order->chat_id),
+            'message_id' => $this->messageId,
+        ]);
+
+
         $apiAccount = ApiAccount::find($this->order->api_account_id);
         if (!$apiAccount || !$apiAccount->is_active) {
             $this->logError('API-аккаунт не активен или не найден.');

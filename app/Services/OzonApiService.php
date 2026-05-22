@@ -187,16 +187,46 @@ class OzonApiService
     public function getChatIdByPostingNumber(string $postingNumber): ?string
     {
         $url = $this->baseUrl . '/v1/chat/list';
-        $payload = [
-            'filter' => ['posting_number' => $postingNumber],
-            'limit' => 1
-        ];
+        $payload = ['filter' => ['posting_number' => $postingNumber], 'limit' => 1];
+
+        \Log::info('getChatIdByPostingNumber request', [
+            'posting_number' => $postingNumber,
+            'url' => $url,
+            'payload' => $payload,
+        ]);
+
         $response = Http::withHeaders($this->headers())->post($url, $payload);
-        \Log::channel('stack')->info('API Request to: ' . $url, ['payload' => $payload]);
-        \Log::channel('stack')->info('API Response: ' . $response->status(), ['body' => $response->body()]);
+
+        \Log::info('getChatIdByPostingNumber response', [
+            'posting_number' => $postingNumber,
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
+
+        if ($response->status() === 404) {
+            \Log::warning('Chat list endpoint returned 404 (perhaps method deprecated?)', ['posting_number' => $postingNumber]);
+            return null;
+        }
+
+        if (!$response->successful()) {
+            \Log::error('getChatIdByPostingNumber failed', [
+                'posting_number' => $postingNumber,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return null;
+        }
+
         $data = $response->json();
         $chats = $data['chats'] ?? [];
-        return $chats[0]['chat_id'] ?? null;
+        $chatId = $chats[0]['chat_id'] ?? null;
+
+        \Log::info('getChatIdByPostingNumber result', [
+            'posting_number' => $postingNumber,
+            'chat_id' => $chatId,
+        ]);
+
+        return $chatId;
     }
 
     /**
@@ -206,16 +236,42 @@ class OzonApiService
     {
         $url = $this->baseUrl . '/v1/chat/start';
         $payload = ['posting_number' => $postingNumber];
+
+        \Log::info('startChat request', [
+            'posting_number' => $postingNumber,
+            'url' => $url,
+            'payload' => $payload,
+        ]);
+
         $response = Http::withHeaders($this->headers())->post($url, $payload);
+
+        \Log::info('startChat response', [
+            'posting_number' => $postingNumber,
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
 
         if (!$response->successful()) {
             $errorBody = $response->json();
             $errorMsg = $errorBody['message'] ?? 'Неизвестная ошибка API';
+            \Log::error('startChat failed', [
+                'posting_number' => $postingNumber,
+                'status' => $response->status(),
+                'error' => $errorMsg,
+                'full_body' => $response->body(),
+            ]);
             throw new \Exception($errorMsg);
         }
 
         $data = $response->json();
-        return $data['chat_id'] ?? null;
+        $chatId = $data['chat_id'] ?? null;
+
+        \Log::info('startChat success', [
+            'posting_number' => $postingNumber,
+            'chat_id' => $chatId,
+        ]);
+
+        return $chatId;
     }
 
     /**
@@ -245,8 +301,30 @@ class OzonApiService
             'chat_id' => $chatId,
             'message' => ['text' => $text],
         ];
+
+        \Log::info('sendMessage request', [
+            'chat_id' => $chatId,
+            'url' => $url,
+            'text_preview' => substr($text, 0, 200),
+        ]);
+
         $response = Http::withHeaders($this->headers())->post($url, $payload);
-        $response->throw();
+
+        \Log::info('sendMessage response', [
+            'chat_id' => $chatId,
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
+
+        if (!$response->successful()) {
+            \Log::error('sendMessage failed', [
+                'chat_id' => $chatId,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            $response->throw();
+        }
+
         return $response->json();
     }
 
