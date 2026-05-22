@@ -264,7 +264,7 @@ class OzonApiService
         }
 
         $data = $response->json();
-        $chatId = $data['chat_id'] ?? null;
+        $chatId = $data['result']['chat_id'] ?? null;   // ← ключ 'result', а не корень
 
         \Log::info('startChat success', [
             'posting_number' => $postingNumber,
