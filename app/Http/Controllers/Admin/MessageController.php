@@ -39,7 +39,9 @@ class MessageController extends Controller
                 ->whereNotNull('payment_date')
                 ->whereHas('items', function ($q) use ($ozonIds) {
                     $q->whereIn('category_id', $ozonIds);
-                });
+                })
+                ->orderBy('payment_date', 'desc')   // сначала свежие
+                ->orderBy('id', 'desc');            // вторичная сортировка (необязательно)
 
             if ($paidDays && is_numeric($paidDays) && $paidDays > 0) {
                 $query->where('payment_date', '>=', now()->subDays((int)$paidDays));
