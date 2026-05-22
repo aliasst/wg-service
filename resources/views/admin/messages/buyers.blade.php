@@ -77,7 +77,7 @@
                         <tbody>
                         @foreach($buyers as $order)
                             <tr>
-                                <td><input type="checkbox" name="order_ids[]" value="{{ $order->id }}"></td>
+                                <td><input type="checkbox" name="order_ids[]" value="{{ $order->id }}" class="buyer-checkbox"></td>
                                 <td>{{ $order->customer_name ?? 'Не указан' }}</td>
                                 <td>{{ $order->posting_number }}</td>
                                 <td>{{ $order->customer_phone ?? '—' }}</td>
@@ -107,8 +107,8 @@
                                 <td>
                                     @if($order->payment_date)
                                         <span class="{{ $order->payment_days > 3 ? 'text-danger' : 'text-muted' }}">
-                        {{ $order->payment_interval }}
-                    </span>
+            {{ $order->payment_interval }}
+        </span>
                                         @if($order->payment_days > 3)
                                             <i class="fas fa-exclamation-triangle text-danger" title="Истёк срок для открытия чата (более 3 дней)"></i>
                                         @endif

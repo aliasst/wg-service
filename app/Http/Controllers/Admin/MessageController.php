@@ -24,7 +24,7 @@ class MessageController extends Controller
 
         $categories = CategoryMapping::where('is_active', true)->get();
         $selectedCategoryId = $request->input('category_id');
-        $paidDays = $request->input('paid_days'); // получаем значение фильтра
+        $paidDays = $request->input('paid_days');
         $buyers = collect();
 
         if ($selectedCategoryId) {
@@ -40,17 +40,11 @@ class MessageController extends Controller
                     $q->whereIn('category_id', $ozonIds);
                 });
 
-            // Применяем фильтр по дате оплаты, если указан
             if ($paidDays && is_numeric($paidDays) && $paidDays > 0) {
                 $query->where('payment_date', '>=', now()->subDays((int)$paidDays));
             }
 
-            $buyers = $query->get()->map(function ($order) {
-                // Добавим вычисляемое поле "время с оплаты"
-                $order->payment_interval = $order->payment_date ? Carbon::parse($order->payment_date)->diffForHumans() : null;
-                $order->payment_days = $order->payment_date ? Carbon::parse($order->payment_date)->diffInDays(now()) : null;
-                return $order;
-            });
+            $buyers = $query->get(); // без map, атрибуты payment_interval и payment_days уже есть в модели
         }
 
         return view('admin.messages.buyers', compact('categories', 'selectedCategoryId', 'buyers', 'paidDays'));
