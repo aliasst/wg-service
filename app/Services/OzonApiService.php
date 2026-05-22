@@ -296,7 +296,7 @@ class OzonApiService
 
     public function sendMessage(string $chatId, string $text): array
     {
-        $url = $this->baseUrl . '/v1/chat/messages';
+        $url = $this->baseUrl . '/v1/chat/send/message';   // правильный UR
         $payload = [
             'chat_id' => $chatId,
             'message' => ['text' => $text],
