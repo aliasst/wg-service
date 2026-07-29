@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ozon Bot | Система управления рассылками</title>
+    <title>Сервис в разработке | WG-Service</title>
+    <meta name="description" content="Сервисный портал Weissgauff временно закрыт от индексации. Идут работы по настройке. Трафика нет, продажи не ведутся." />
+    <meta name="robots" content="noindex, nofollow">
     <style>
         * {
             margin: 0;
