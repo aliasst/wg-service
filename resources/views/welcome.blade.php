@@ -10,7 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        body {
+        .body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             background: linear-gradient(135deg, #0b2b40 0%, #1c5a6a 100%);
             min-height: 100vh;
@@ -57,13 +57,42 @@
         }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h1>WG-Service</h1>
-{{--    <p>Управление персонализированными рассылками<br>для увеличения повторных продаж</p>--}}
-{{--    <div class="footer">--}}
-{{--        Автоматизация сообщений покупателям Ozon (FBO/FBS)--}}
-{{--    </div>--}}
+<div class="dev-warning">
+    ⚠️ САЙТ НАХОДИТСЯ В РАЗРАБОТКЕ! НЕ ИСПОЛЬЗУЕТСЯ ДЛЯ ПРОДАЖ, НЕ ИСПОЛЬЗУЕТСЯ ДЛЯ ПОСЕТИТЕЛЕЙ ⚠️
 </div>
+
+<style>
+    .dev-warning {
+        background: #cc0000;
+        color: white;
+        text-align: center;
+        padding: 18px;
+        font-size: 1.8rem;
+        font-weight: bold;
+        font-family: sans-serif;
+        letter-spacing: 1px;
+        border-bottom: 4px solid yellow;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    /* Компенсируем, если у body есть margin */
+    body {
+        margin-top: 0 !important;
+    }
+</style>
+
+<div class="body">
+    <div class="container">
+        <h1>WG-Service</h1>
+        {{--    <p>Управление персонализированными рассылками<br>для увеличения повторных продаж</p>--}}
+        {{--    <div class="footer">--}}
+        {{--        Автоматизация сообщений покупателям Ozon (FBO/FBS)--}}
+        {{--    </div>--}}
+    </div>
+</div>
+
+
 </body>
 </html>
